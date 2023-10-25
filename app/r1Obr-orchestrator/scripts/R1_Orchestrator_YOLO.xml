@@ -100,7 +100,8 @@
    <!-- microphone button trigger -->
    <module>
       <name>joystickCtrl</name>
-      <parameters>--context micActivation --from joystick_trigger_8bitdo.ini</parameters>
+      <parameters>--from joystick_trigger_8bitdo.ini --silent</parameters>
+      <workdir>/usr/local/src/robot/assistive-rehab/build/share/ICUBcontrib/contexts/AssistiveRehab</workdir>
       <node>console</node>
    </module>
 

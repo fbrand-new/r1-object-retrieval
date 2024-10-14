@@ -111,21 +111,31 @@ bool Nav2Loc::go(string loc)
     {
         if(!m_iNav2D->checkInsideArea("laboratory_area"))
         {
-            if(!m_iNav2D->gotoTargetByLocationName("laboratory_path"))
+            if(!retryNavigation("laboratory_path"))
             {
-                yCError(NAV_2_LOC, "Error with navigation to lab area from outside");
-                return false;
+                yCError(NAV_2_LOC, "Error with navigation to lab area");
             }
         }
+        /*if(!m_iNav2D->checkInsideArea("laboratory_area"))*/
+        /*{*/
+        /*    if(!m_iNav2D->gotoTargetByLocationName("laboratory_path"))*/
+        /*    {*/
+        /*        yCError(NAV_2_LOC, "Error with navigation to lab area from outside");*/
+        /*        return false;*/
+        /*    }*/
+        /*}*/
         // If we are inside the lab area, we swap to the default behaviour
     }
 
-    if(!m_iNav2D->gotoTargetByLocationName(loc))
+    if(!retryNavigation(loc))
     {
+    /*if(!m_iNav2D->gotoTargetByLocationName(loc))*/
+    /*{*/
         yCError(NAV_2_LOC, "Error with navigation to home location");
-        return false;
+    /*    return false;*/
     }
 
+    m_navigation_retries = 0;
     m_current_target_location = loc;
 
     return true;
@@ -183,6 +193,12 @@ bool Nav2Loc::areYouMoving()
 
 bool Nav2Loc::isNavigationAborted()
 {
+    // We try to reissue the navigation command once if it failsc
+    if(m_navigation_retries < 1)
+    {
+        return false;
+    }
+
     NavigationStatusEnum currentStatus;
     m_iNav2D->getNavigationStatus(currentStatus);
 
@@ -193,3 +209,48 @@ string Nav2Loc::getCurrentTarget()
 {
     return m_current_target_location;
 }
+
+bool Nav2Loc::retryNavigation(const std::string& loc)
+{
+    // We reissue the navigation command once if it fails
+    while (m_navigation_retries < 2)
+    {
+        if(!m_iNav2D->gotoTargetByLocationName(loc))
+        {
+            yCWarning(NAV_2_LOC, "Error with navigation to %s location", loc.c_str());
+            
+            // First we just try to resend the gotoTargetByLocationName command. If it fails again, we try to localize the robot first by uncommenting the following line
+            //this->localizeInPlace();
+            m_navigation_retries++;
+        }
+        else
+        {
+            m_navigation_retries = 0;
+            return true;
+        }
+    }
+
+    yCWarning(NAV_2_LOC, "Definitive error with navigation to %s location", loc.c_str());
+    return false;
+}
+
+/*bool Nav2Loc::localizeInPlace()*/
+/*{*/
+/*    // The robot should spin in place to localize itself*/
+/*    int t{0};*/
+/*    int tmax{5};*/
+/**/
+/*    while (t < tmax)*/
+/*    {*/
+/*        if(!m_iNav2D->applyVelocityCommand(0.0,0.0,1.0))*/
+/*        {*/
+/*            yCError(NAV_2_LOC, "Error applying velocity command");*/
+/*            return false;*/
+/*        }*/
+/*        yarp::os::Time::delay(0.1);*/
+/*        t++;*/
+/*    }*/
+/**/
+/*    return true;*/
+/**/
+/*}*/

@@ -19,6 +19,8 @@
 #ifndef NAV_2_LOC_H
 #define NAV_2_LOC_H
 
+#include <cstddef>
+#include <iterator>
 #include <yarp/os/Log.h>
 #include <yarp/os/LogStream.h>
 #include <yarp/dev/PolyDriver.h>
@@ -40,6 +42,7 @@ private:
     Map2DLocation           m_home_location;
     string                  m_current_target_location;
     double                  m_near_distance;
+    std::size_t             m_navigation_retries{0};
 
     // Devices
     PolyDriver              m_nav2DPoly;
@@ -59,6 +62,7 @@ public:
     bool areYouNearToGoal();
     bool areYouMoving();
     bool isNavigationAborted();
+    bool retryNavigation(const std::string&);
     string getCurrentTarget();
 };
 

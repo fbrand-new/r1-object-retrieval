@@ -19,6 +19,8 @@
 #ifndef R1OBR_ORCHESTRATOR_THREAD_H
 #define R1OBR_ORCHESTRATOR_THREAD_H
 
+#include <cstddef>
+#include <string>
 #include <yarp/os/all.h>
 #include "nav2loc.h"
 #include "continuousSearch.h"
@@ -110,6 +112,10 @@ private:
     bool                    m_object_not_found;
     bool                    m_going;
     string                  m_map_prefix;
+
+    // Navigation
+    string                  m_current_destination{};
+    size_t                  m_current_retries{0};
 
     ResourceFinder&         m_rf;
 

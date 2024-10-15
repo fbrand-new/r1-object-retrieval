@@ -331,6 +331,12 @@ void OrchestratorThread::run()
 
             if (nav_aborted)
             {
+                if(m_current_retries < 2)
+                {
+                    go(m_current_destination);
+                    m_current_retries++;
+                }
+                m_current_retries == 0;
                 askChatBotToSpeak(go_target_not_reached);
                 m_status = R1_IDLE;
             }
@@ -901,6 +907,7 @@ bool OrchestratorThread::go(string loc)
 
     m_status = R1_GOING;
     m_going = true;
+    m_current_destination = loc;
     return m_nav2loc->go(loc);
 }
 

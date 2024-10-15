@@ -326,22 +326,27 @@ void OrchestratorThread::run()
             {
                 arrived = m_nav2loc->areYouArrived();
                 nav_aborted = m_nav2loc->isNavigationAborted();
+                if(nav_aborted && m_current_retries < 5) //We retry for 5 times before giving up.
+                {
+                    yCInfo(R1OBR_ORCHESTRATOR_THREAD, "Going to %s with try number %lu",m_current_destination, m_current_retries);
+                    yCDebug(R1OBR_ORCHESTRATOR_THREAD, "First we spin in place to recover localization");
+                    spin();
+                    yCDebug(R1OBR_ORCHESTRATOR_THREAD, "Then we go again");
+                    go(m_current_destination);
+                    m_current_retries++;
+                    nav_aborted = false;
+                    Time::delay(1); // We give more arbitrary time for the state machine to not check aborted immediately;
+                }
+
                 Time::delay(0.2);
             }
 
             if (nav_aborted)
             {
-                if(m_current_retries < 2)
-                {
-                    go(m_current_destination);
-                    m_current_retries++;
-                }
-                m_current_retries == 0;
                 askChatBotToSpeak(go_target_not_reached);
                 m_status = R1_IDLE;
             }
 
-            
             if (m_status == R1_GOING) //in case of external stop
             {
                 askChatBotToSpeak(go_target_reached);
@@ -351,6 +356,7 @@ void OrchestratorThread::run()
 
         else if (m_status == R1_IDLE)
         {
+            m_current_retries = 0;
             Time::delay(0.8);
         }
 
@@ -878,7 +884,7 @@ bool OrchestratorThread::go(string loc)
     yCInfo(R1OBR_ORCHESTRATOR_THREAD, "Going to %s", loc.c_str());
     
     // if (m_status != R1_IDLE) 
-    stopOrReset("reset_noNavpos");      
+    stopOrReset("reset_noNavpos");
 
     
     if (loc != "home" && loc.find(m_map_prefix) == string::npos) 
@@ -925,4 +931,9 @@ bool OrchestratorThread::dance(string dance_name)
     yCError(R1OBR_ORCHESTRATOR_THREAD,"Cannot dance now. Status should be 'idle', send a 'stop' command");
 
     return false;
+}
+
+bool OrchestratorThread::spin()
+{
+    return m_nav2loc->spin();
 }

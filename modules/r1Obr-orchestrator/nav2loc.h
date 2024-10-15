@@ -60,6 +60,7 @@ public:
     bool areYouMoving();
     bool isNavigationAborted();
     string getCurrentTarget();
+    bool spin();
 };
 
 #endif //NAV_2_LOC_H

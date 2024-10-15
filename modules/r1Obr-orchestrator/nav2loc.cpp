@@ -107,7 +107,7 @@ bool Nav2Loc::go(string loc)
 
     // This piece of code will work with a specific locations.ini configuration
     // Forcing a specific path following if we want to go to the laboratory from outside
-    if(loc == "laboratory")
+    if(loc == "laboratory" || loc == "erzelli_laboratory")
     {
         if(!m_iNav2D->checkInsideArea("laboratory_area"))
         {
@@ -116,6 +116,9 @@ bool Nav2Loc::go(string loc)
                 yCError(NAV_2_LOC, "Error with navigation to lab area from outside");
                 return false;
             }
+        }
+        else {
+            yCInfo(NAV_2_LOC, "We are already inside laboratory area");
         }
         // If we are inside the lab area, we swap to the default behaviour
     }
@@ -192,4 +195,25 @@ bool Nav2Loc::isNavigationAborted()
 string Nav2Loc::getCurrentTarget()
 {
     return m_current_target_location;
+}
+
+bool Nav2Loc::spin()
+{
+    double time = 3;
+    double period = 0.1;
+    double t{0};
+    while(t < time)
+    {
+        m_iNav2D->applyVelocityCommand(0.0, 0.0, 0.1, 0);
+        Time::delay(period); 
+        t += period;
+    }
+
+    t = 0;
+    while(t < time)
+    {
+        m_iNav2D->applyVelocityCommand(0.0,0.0,0.1,0);
+        Time::delay(period);
+        t += period;
+    }
 }

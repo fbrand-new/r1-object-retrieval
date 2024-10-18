@@ -1,4 +1,4 @@
-/*
+*
  * Copyright (C) 2006-2020 Istituto Italiano di Tecnologia (IIT)
  *
  * This library is free software; you can redistribute it and/or
@@ -60,7 +60,7 @@ public:
     bool areYouMoving();
     bool isNavigationAborted();
     string getCurrentTarget();
-    bool spin();
+    bool spin(bool iseven);
 };
 
 #endif //NAV_2_LOC_H

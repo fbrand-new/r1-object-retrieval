@@ -203,14 +203,16 @@ string Nav2Loc::getCurrentTarget()
     return m_current_target_location;
 }
 
-bool Nav2Loc::spin()
+bool Nav2Loc::spin(bool iseven)
 {
     double time = 3;
     double period = 0.1;
     double t{0};
+
+    float parity = iseven ? 1 : -1;
     while(t < time)
     {
-        m_iNav2D->applyVelocityCommand(0.0, 0.0, 0.1, 0);
+        m_iNav2D->applyVelocityCommand(0.0, 0.0, 1, 0);
         Time::delay(period); 
         t += period;
     }
@@ -218,7 +220,7 @@ bool Nav2Loc::spin()
     t = 0;
     while(t < time)
     {
-        m_iNav2D->applyVelocityCommand(0.0, 0.0, -0.1, -0);
+        m_iNav2D->applyVelocityCommand(0.0, 0.0, -1, -0);
         Time::delay(period);
         t += period;
     }

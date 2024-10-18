@@ -158,7 +158,7 @@ public:
     bool        go(string loc);
 
     bool        dance(string dance_name);
-    bool        spin();
+    bool        spin(bool iseven);
 
 };
 

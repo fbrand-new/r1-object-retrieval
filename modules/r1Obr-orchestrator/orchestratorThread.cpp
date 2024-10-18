@@ -330,7 +330,7 @@ void OrchestratorThread::run()
                 {
                     yCInfo(R1OBR_ORCHESTRATOR_THREAD, "Going to %s with try number %lu",m_current_destination, m_current_retries);
                     yCDebug(R1OBR_ORCHESTRATOR_THREAD, "First we spin in place to recover localization");
-                    spin();
+                    spin(m_current_retries % 2);
                     yCDebug(R1OBR_ORCHESTRATOR_THREAD, "Then we go again");
                     go(m_current_destination);
                     m_current_retries++;
@@ -939,7 +939,7 @@ bool OrchestratorThread::dance(string dance_name)
     return false;
 }
 
-bool OrchestratorThread::spin()
+bool OrchestratorThread::spin(bool iseven)
 {
-    return m_nav2loc->spin();
+    return m_nav2loc->spin(iseven);
 }

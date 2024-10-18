@@ -332,7 +332,7 @@ void OrchestratorThread::run()
                     yCDebug(R1OBR_ORCHESTRATOR_THREAD, "First we spin in place to recover localization");
                     spin();
                     yCDebug(R1OBR_ORCHESTRATOR_THREAD, "Then we go again");
-                    go(m_current_destination)k
+                    go(m_current_destination);
                     m_current_retries++;
                     nav_aborted = false;
                     Time::delay(1); // We give more arbitrary time for the state machine to not check aborted immediately;
@@ -347,10 +347,11 @@ void OrchestratorThread::run()
                 m_status = R1_IDLE;
             }
 
-            if (arrived && m_current_destination == "erzelli_laboratory" && m_status == R1_GOING)
-            {
-                Time::delay(1); //Give it just a little time to start the second part of the journey
-            }
+            // Can we find a more robust solution to 
+            /*if (arrived && m_current_destination == "erzelli_laboratory" && m_status == R1_GOING)*/
+            /*{*/
+            /*    Time::delay(1); //Give it just a little time to start the second part of the journey*/
+            /*}*/
 
             if (m_status == R1_GOING) //in case of external stop
             {

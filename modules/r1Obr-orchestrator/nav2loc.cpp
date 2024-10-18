@@ -162,7 +162,13 @@ bool Nav2Loc::areYouArrived()
     NavigationStatusEnum currentStatus;
     m_iNav2D->getNavigationStatus(currentStatus);
 
-    return currentStatus == navigation_status_goal_reached;
+    // 2 possible solutions to handle waypoint follower here:
+    // 1. Check if there are any existing waypoint left
+    // I feel it might be more general but I also fear the nav algo does not actually return us the waypoint we manually set rather a set of waypoints that the global planner has decided for the current path
+    // 2. Check if we are also near the goal
+    // This should be easier, and applicable as long as the set waypoint are distant enough for the goal (reasonable assumption for this use case.
+
+    return (currentStatus == navigation_status_goal_reached) && areYouNearToGoal();
 }
 
 

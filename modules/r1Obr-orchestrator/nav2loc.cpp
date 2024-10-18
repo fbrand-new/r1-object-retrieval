@@ -218,7 +218,7 @@ bool Nav2Loc::spin()
     t = 0;
     while(t < time)
     {
-        m_iNav2D->applyVelocityCommand(0.0,0.0,0.1,0);
+        m_iNav2D->applyVelocityCommand(0.0, 0.0, -0.1, -0);
         Time::delay(period);
         t += period;
     }

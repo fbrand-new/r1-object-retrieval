@@ -443,23 +443,32 @@ bool Orchestrator::say(const string& toSay)
     Bottle req{"stopRecording_RPC"}, rep;
     m_audiorecorderRPCPort.write(req,rep);
 
-    //speak
-    bool ret = m_additional_speaker->say(toSay);
-    
-
-    //wait until finish speaking
-    Time::delay(0.5);
+    //wait until audio player is done talking
     bool audio_is_playing{true};
     while (audio_is_playing) 
     {
-        Bottle* player_status = m_audioPlayPort.read(false);
-        if (player_status)
-        {
-            audio_is_playing = player_status->get(1).asInt64() > 0;
-        }
-        Time::delay(0.1);
+        audioIsPlaying(audio_is_playing);
+        Time::delay(0.05);
     }
 
+    //speak
+    bool ret = m_additional_speaker->say(toSay);
+    
+    //wait until finish speaking
+    audioIsPlaying(audio_is_playing);
+    while (!audio_is_playing) 
+    {
+        audioIsPlaying(audio_is_playing);
+        Time::delay(0.05);
+    }
+
+    while (audio_is_playing) 
+    {
+        audioIsPlaying(audio_is_playing);
+        Time::delay(0.05);
+    }
+
+    yCDebug(R1OBR_ORCHESTRATOR, "Finished speaking");
     //re-open microphone
     req.clear(); rep.clear();
     req.addString("startRecording_RPC");
@@ -480,4 +489,17 @@ bool Orchestrator::tell(const string& key)
 bool Orchestrator::dance(const string& motion)  
 {    
     return m_inner_thread->dance(motion);
+}
+
+void Orchestrator::audioIsPlaying(bool& audio_is_playing)
+{
+    Bottle* player_status = m_audioPlayPort.read(false);
+    if(player_status)
+    {
+        audio_is_playing = player_status->get(1).asInt64() > 0;
+    }
+    else 
+    {
+        yCInfo(R1OBR_ORCHESTRATOR, "failed to read audio player");
+    }
 }

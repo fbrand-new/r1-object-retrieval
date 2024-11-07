@@ -69,6 +69,8 @@ private:
     RpcClient                   m_audiorecorderRPCPort;
     BufferedPort<Bottle>        m_audioPlayPort;
 
+    void audioIsPlaying(bool& audio_is_playing);
+
 public:
     //Constructor/Destructor
     Orchestrator();

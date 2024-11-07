@@ -541,9 +541,16 @@ bool ApproachObjectThread::calculateTargetLoc(Map2DLocation& locRobot, Map2DLoca
     double alfa_deg = alfa_rad / M_PI * 180;
 
     locTarget.map_id = locRobot.map_id;
-    locTarget.theta = alfa_deg + m_deg_increase_sign*m_deg_increase_count*m_deg_increase; //orientation from a point of the circumefernce towards the center 
-    locTarget.x = locObject.x - m_safe_distance*cos(locTarget.theta / 180 * M_PI);
-    locTarget.y = locObject.y - m_safe_distance*sin(locTarget.theta / 180 * M_PI);
+
+    // This code makes the robot approach the object from points on a circumeference around the object
+    // locTarget.theta = alfa_deg + m_deg_increase_sign*m_deg_increase_count*m_deg_increase; //orientation from a point of the circumefernce towards the center 
+    // locTarget.x = locObject.x - m_safe_distance*cos(locTarget.theta / 180 * M_PI);
+    // locTarget.y = locObject.y - m_safe_distance*sin(locTarget.theta / 180 * M_PI);
+
+    // We now just spin the robot in place towards the object
+    locTarget.theta = alfa_deg;
+    locTarget.x = locRobot.x;
+    locTarget.y = locRobot.y;
 
     m_deg_increase_sign=m_deg_increase_sign*-1;
     m_deg_increase_count++;

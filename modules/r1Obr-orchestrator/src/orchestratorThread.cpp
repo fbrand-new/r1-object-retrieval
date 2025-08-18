@@ -42,6 +42,7 @@ OrchestratorThread::OrchestratorThread(yarp::os::ResourceFinder &rf):
     m_positive_outcome_port_name    = "/r1Obr-orchestrator/positive_outcome:o";
     m_negative_outcome_port_name    = "/r1Obr-orchestrator/negative_outcome:o";
     m_faceexpression_rpc_port_name  = "/r1Obr-orchestrator/faceExpression:rpc";
+    m_turntoperson_rpc_port_name    = "/r1Obr-orchestrator/turnToPerson:rpc";
     m_sn_feedback_port_name         = "/r1Obr-orchestrator/sensorNetworkFeedback:o";
     m_map_prefix = "";
 }
@@ -55,6 +56,7 @@ bool OrchestratorThread::threadInit()
     if (m_rf.check("goandfindit_rpc_port"))     {m_goandfindit_rpc_port_name      = m_rf.find("goandfindit_rpc_port").asString();}
     if (m_rf.check("goandfindit_result_port"))  {m_goandfindit_result_port_name   = m_rf.find("goandfindit_result_port").asString();}
     if (m_rf.check("faceexpression_rpc_port"))  {m_faceexpression_rpc_port_name   = m_rf.find("faceexpression_rpc_port").asString();}
+    if (m_rf.check("turntoperson_rpc_port"))    {m_turntoperson_rpc_port_name     = m_rf.find("turntoperson_rpc_port").asString();}
     if (m_rf.check("sn_feedback_port"))         {m_sn_feedback_port_name          = m_rf.find("sn_feedback_port").asString();}
 
     if(m_rf.check("map_prefix")){m_map_prefix = m_rf.find("map_prefix").asString();}
@@ -81,6 +83,11 @@ bool OrchestratorThread::threadInit()
 
     if(!m_faceexpression_rpc_port.open(m_faceexpression_rpc_port_name)){
         yCError(R1OBR_ORCHESTRATOR_THREAD) << "Cannot open faceExpression RPC port with name" << m_faceexpression_rpc_port_name;
+        return false;
+    }
+
+    if(!m_turntoperson_rpc_port.open(m_turntoperson_rpc_port_name)){
+        yCError(R1OBR_ORCHESTRATOR_THREAD) << "Cannot open turnToPerson RPC port with name" << m_turntoperson_rpc_port_name;
         return false;
     }
 
@@ -179,8 +186,11 @@ if (m_sensor_network_rpc_port.asPort().isOpen())
         m_negative_outcome_port.close();
 
     if (m_faceexpression_rpc_port.asPort().isOpen())
-        m_faceexpression_rpc_port.close();
-
+        m_faceexpression_rpc_port.close(); 
+        
+    if (m_turntoperson_rpc_port.asPort().isOpen())
+        m_turntoperson_rpc_port.close(); 
+        
     if (m_sn_feedback_port.isClosed())
         m_sn_feedback_port.close();
 
@@ -349,6 +359,8 @@ void OrchestratorThread::run()
                     askChatBotToSpeak(go_target_reached);
                 }
                 m_status = R1_IDLE;
+                // Enable turnToPerson after successful navigation
+                enableTurnToPerson();
             }
         }
 
@@ -440,6 +452,9 @@ void OrchestratorThread::search(const Bottle& btl)
     {
         stopOrReset("stop");
     }
+
+    // Disable turnToPerson during search operations
+    disableTurnToPerson();
 
     m_object_found = false;
     m_object_not_found = false;
@@ -929,6 +944,9 @@ bool OrchestratorThread::askChatBotToSpeak(R1_says stat)
 bool OrchestratorThread::go(string loc)
 {
     yCInfo(R1OBR_ORCHESTRATOR_THREAD, "Going to %s", loc.c_str());
+    
+    // Disable turnToPerson before navigation starts
+    disableTurnToPerson();
 
     // if (m_status != R1_IDLE)
     stopOrReset("reset_noNavpos");
@@ -1035,4 +1053,36 @@ bool OrchestratorThread::dance(string dance_name)
     yCError(R1OBR_ORCHESTRATOR_THREAD,"Cannot dance now. Status should be 'idle', send a 'stop' command");
 
     return false;
+}
+
+/****************************************************************/
+void OrchestratorThread::enableTurnToPerson()
+{
+    if (m_turntoperson_rpc_port.asPort().isOpen())
+    {
+        Bottle cmd, reply;
+        cmd.addString("start");
+        m_turntoperson_rpc_port.write(cmd, reply);
+        yCInfo(R1OBR_ORCHESTRATOR_THREAD, "Enabled turnToPerson module - reply: %s", reply.toString().c_str());
+    }
+    else
+    {
+        yCWarning(R1OBR_ORCHESTRATOR_THREAD, "turnToPerson RPC port is not open");
+    }
+}
+
+/****************************************************************/
+void OrchestratorThread::disableTurnToPerson()
+{
+    if (m_turntoperson_rpc_port.asPort().isOpen())
+    {
+        Bottle cmd, reply;
+        cmd.addString("stop");
+        m_turntoperson_rpc_port.write(cmd, reply);
+        yCInfo(R1OBR_ORCHESTRATOR_THREAD, "Disabled turnToPerson module - reply: %s", reply.toString().c_str());
+    }
+    else
+    {
+        yCWarning(R1OBR_ORCHESTRATOR_THREAD, "turnToPerson RPC port is not open");
+    }
 }

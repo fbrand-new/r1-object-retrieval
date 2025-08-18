@@ -85,6 +85,9 @@ private:
     string                  m_faceexpression_rpc_port_name;
     RpcClient               m_faceexpression_rpc_port;
 
+    string                  m_turntoperson_rpc_port_name;
+    RpcClient               m_turntoperson_rpc_port;
+
     //Navigator to location
     Nav2Loc*                m_nav2loc;
 
@@ -153,6 +156,9 @@ public:
     bool        go(string loc);
     bool        guide(string loc);
     bool        dance(string dance_name);
+
+    void        enableTurnToPerson();
+    void        disableTurnToPerson();
 
 };
 
